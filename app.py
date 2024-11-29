@@ -1,10 +1,11 @@
+import os
 import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-import os
-import stat
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import requests
 import concurrent.futures
 
@@ -12,7 +13,7 @@ import concurrent.futures
 def set_chrome_options():
     chrome_options = Options()
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--headless")  # ヘッドレスモード
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.binary_location = "/usr/bin/chromium-browser"  # Chromiumのパスを指定
@@ -21,9 +22,8 @@ def set_chrome_options():
 # WebDriverを初期化する関数
 def initialize_driver():
     try:
-        chromedriver_path = ChromeDriverManager().install()
-        os.chmod(chromedriver_path, stat.S_IRWXU)  # 実行権限を付与
-        service = Service(chromedriver_path)
+        # aptでインストールされたchromedriverを使用
+        service = Service("/usr/bin/chromedriver")
         chrome_options = set_chrome_options()
         driver = webdriver.Chrome(service=service, options=chrome_options)
         return driver
@@ -51,6 +51,9 @@ def download_images_from_button_tags(url):
 
     try:
         driver.get(url)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'o-productdetailvisual_thumb'))
+        )
         button_tags = driver.find_elements(By.CLASS_NAME, 'o-productdetailvisual_thumb')
         image_urls = [
             'https:' + tag.get_attribute('data-mainsrc') if tag.get_attribute('data-mainsrc').startswith('//') else tag.get_attribute('data-mainsrc')
@@ -89,6 +92,7 @@ if st.button("画像を取得"):
                 st.image(img_url, caption=os.path.basename(img_url), use_container_width=True)
         else:
             st.warning("画像が見つかりませんでした。")
+
 
 
 

@@ -1,3 +1,5 @@
+chromium-browser
+chromium-chromedriver
 libglib2.0-0
 libnss3
 libgconf-2-4
@@ -17,5 +19,3 @@ libasound2
 libnspr4
 xdg-utils
 wget
-chromium-browser
-
