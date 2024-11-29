@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import requests
 import os
 import concurrent.futures
@@ -12,12 +13,10 @@ import concurrent.futures
 # Chromeのオプションを設定する関数
 def set_chrome_options():
     chrome_options = Options()
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--allow-insecure-localhost")
+    chrome_options.add_argument("--disable-gpu")  # GPUアクセラレーションを無効化
+    chrome_options.add_argument("--headless")  # ヘッドレスモード
+    chrome_options.add_argument("--no-sandbox")  # サンドボックスを無効化
+    chrome_options.add_argument("--disable-dev-shm-usage")  # /dev/shm使用を無効化
     return chrome_options
 
 # 複数の画像を並行してダウンロードする関数
@@ -42,7 +41,7 @@ def download_image(image_url, save_dir):
 # メインの画像ダウンロード処理
 def download_images_from_button_tags(url):
     chrome_options = set_chrome_options()
-    service = Service()  # 自動ドライバ管理
+    service = Service(ChromeDriverManager().install())  # WebDriverManagerで自動インストール
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     driver.get(url)
@@ -90,7 +89,7 @@ if st.button("画像を取得"):
             # 取得した画像のプレビュー
             st.subheader("取得した画像")
             for img_url in image_urls:
-                st.image(img_url, caption=os.path.basename(img_url), use_container_width=True)  # 修正箇所
+                st.image(img_url, caption=os.path.basename(img_url), use_container_width=True)
         else:
             st.warning("画像が見つかりませんでした。")
 
