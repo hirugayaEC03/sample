@@ -2,12 +2,10 @@ import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import requests
 import os
+import stat
+import requests
 import concurrent.futures
 
 # Chromeのオプションを設定する関数
@@ -17,16 +15,15 @@ def set_chrome_options():
     chrome_options.add_argument("--headless")  # ヘッドレスモード
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-software-rasterizer")
-    chrome_options.binary_location = "/usr/bin/google-chrome"  # Chromiumのパスを指定
+    chrome_options.binary_location = "/usr/bin/chromium-browser"  # Chromiumのパスを指定
     return chrome_options
 
 # WebDriverを初期化する関数
 def initialize_driver():
     try:
-        # driver_versionを使用して特定のバージョンを指定
-        service = Service(ChromeDriverManager(driver_version="114.0.5735.90").install())
+        chromedriver_path = ChromeDriverManager().install()
+        os.chmod(chromedriver_path, stat.S_IRWXU)  # 実行権限を付与
+        service = Service(chromedriver_path)
         chrome_options = set_chrome_options()
         driver = webdriver.Chrome(service=service, options=chrome_options)
         return driver
@@ -54,9 +51,6 @@ def download_images_from_button_tags(url):
 
     try:
         driver.get(url)
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'o-productdetailvisual_thumb'))
-        )
         button_tags = driver.find_elements(By.CLASS_NAME, 'o-productdetailvisual_thumb')
         image_urls = [
             'https:' + tag.get_attribute('data-mainsrc') if tag.get_attribute('data-mainsrc').startswith('//') else tag.get_attribute('data-mainsrc')
@@ -95,6 +89,7 @@ if st.button("画像を取得"):
                 st.image(img_url, caption=os.path.basename(img_url), use_container_width=True)
         else:
             st.warning("画像が見つかりませんでした。")
+
 
 
 

@@ -17,3 +17,5 @@ libasound2
 libnspr4
 xdg-utils
 wget
+chromium-browser
+
