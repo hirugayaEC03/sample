@@ -16,41 +16,42 @@ def set_chrome_options():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.binary_location = "/usr/bin/google-chrome"
     return chrome_options
 
-def download_image(image_url, save_dir):
+def initialize_driver():
     try:
-        image_response = requests.get(image_url, stream=True)
-        if image_response.status_code == 200:
-            image_filename = os.path.join(save_dir, image_url.split('/')[-1])
-            with open(image_filename, 'wb') as f:
-                for chunk in image_response.iter_content(1024):
-                    f.write(chunk)
+        service = Service(ChromeDriverManager(version="114.0.5735.90").install(), log_path="chromedriver.log")
+        chrome_options = set_chrome_options()
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        return driver
     except Exception as e:
-        st.error(f"画像のダウンロード中にエラーが発生しました: {e}")
+        st.error(f"WebDriverの初期化中にエラーが発生しました: {e}")
+        return None
 
 def download_images_from_button_tags(url):
+    driver = initialize_driver()
+    if not driver:
+        return []
+
     try:
-        chrome_options = set_chrome_options()
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
         driver.get(url)
-
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'o-productdetailvisual_thumb'))
         )
-
         button_tags = driver.find_elements(By.CLASS_NAME, 'o-productdetailvisual_thumb')
         image_urls = [
             'https:' + tag.get_attribute('data-mainsrc') if tag.get_attribute('data-mainsrc').startswith('//') else tag.get_attribute('data-mainsrc')
             for tag in button_tags
         ]
-
         driver.quit()
         return image_urls
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+        if driver:
+            driver.quit()
         return []
 
 st.title("Seleniumを使った画像取得アプリ")
@@ -71,6 +72,7 @@ if st.button("画像を取得"):
             st.success(f"{len(image_urls)}枚の画像を保存しました")
         else:
             st.warning("画像が見つかりませんでした。")
+
 
 
 
