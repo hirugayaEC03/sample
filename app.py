@@ -9,7 +9,6 @@ from selenium.webdriver.support import expected_conditions as EC
 import requests
 import concurrent.futures
 
-# Chromeのオプションを設定する関数
 def set_chrome_options():
     chrome_options = Options()
     chrome_options.add_argument("--disable-gpu")
@@ -19,10 +18,9 @@ def set_chrome_options():
     chrome_options.binary_location = "/usr/bin/chromium-browser"  # Chromiumのパスを指定
     return chrome_options
 
-# WebDriverを初期化する関数
 def initialize_driver():
     try:
-        # aptでインストールされたchromedriverを使用
+        # システムのchromedriverを使用
         service = Service("/usr/bin/chromedriver")
         chrome_options = set_chrome_options()
         driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -31,7 +29,6 @@ def initialize_driver():
         st.error(f"WebDriverの初期化中にエラーが発生しました: {e}")
         return None
 
-# URLから画像をダウンロードする関数
 def download_image(image_url, save_dir):
     try:
         image_response = requests.get(image_url, stream=True)
@@ -43,7 +40,6 @@ def download_image(image_url, save_dir):
     except Exception as e:
         st.error(f"画像のダウンロード中にエラーが発生しました: {e}")
 
-# ボタンタグから画像URLを取得する関数
 def download_images_from_button_tags(url):
     driver = initialize_driver()
     if not driver:
@@ -67,7 +63,6 @@ def download_images_from_button_tags(url):
             driver.quit()
         return []
 
-# StreamlitアプリのUI
 st.title("Seleniumを使った画像取得アプリ")
 
 url = st.text_input("画像を取得するURLを入力してください")
@@ -86,12 +81,12 @@ if st.button("画像を取得"):
             st.success(f"{len(image_urls)}枚の画像を保存しました")
             st.write(f"保存フォルダ: `{save_dir}`")
 
-            # プレビューを表示
             st.subheader("取得した画像")
             for img_url in image_urls:
                 st.image(img_url, caption=os.path.basename(img_url), use_container_width=True)
         else:
             st.warning("画像が見つかりませんでした。")
+
 
 
 
