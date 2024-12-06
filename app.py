@@ -22,7 +22,8 @@ def set_chrome_options():
     return chrome_options
 
 # 環境変数にchromedriverのパスを設定
-os.environ["PATH"] += os.pathsep + "/home/appuser/.wdm/drivers/chromedriver/linux64/114.0.5735.90/"
+chromedriver_path = r"C:\Users\hirug\.wdm\drivers\chromedriver\win64\131.0.6778.87\chromedriver-win32/chromedriver.exe"
+os.environ["PATH"] += os.pathsep + chromedriver_path
 
 # 複数の画像を並行してダウンロードする関数
 def download_images_concurrently(image_urls, save_dir):
