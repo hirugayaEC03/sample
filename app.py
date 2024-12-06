@@ -1,9 +1,10 @@
 import streamlit as st
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 import requests
 import os
 import concurrent.futures
@@ -11,12 +12,12 @@ import concurrent.futures
 # Chromeのオプションを設定する関数
 def set_chrome_options():
     chrome_options = Options()
+    chrome_options.add_argument("--headless")  # ヘッドレスモード
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--allow-insecure-localhost")
+    chrome_options.add_argument("--disable-software-rasterizer")  # ソフトウェアラスタライズを無効化
     return chrome_options
 
 # 複数の画像を並行してダウンロードする関数
@@ -29,21 +30,29 @@ def download_image(image_url, save_dir):
     try:
         image_response = requests.get(image_url)
         if image_response.status_code == 200:
-            image_filename = os.path.join(save_dir, image_url.split('/')[-1])
+            image_filename = os.path.join(save_dir, os.path.basename(image_url))
             with open(image_filename, 'wb') as f:
                 f.write(image_response.content)
         else:
-            st.error(f"画像のダウンロードに失敗しました: {image_url}")
+            st.warning(f"画像のダウンロードに失敗しました: {image_url}")
     except Exception as e:
         st.error(f"画像のダウンロード中にエラーが発生しました: {e}")
 
 # メインの画像ダウンロード処理
 def download_images_from_button_tags(url):
+    # ChromeDriverのパスを明示的に指定
+    service = Service("/usr/local/bin/chromedriver")
     chrome_options = set_chrome_options()
-    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    except Exception as e:
+        st.error(f"WebDriverの起動に失敗しました: {e}")
+        return
 
     try:
         driver.get(url)
+        st.info("ページを読み込み中...")
 
         # ページが読み込まれるまで特定の要素が表示されるのを待機
         WebDriverWait(driver, 10).until(
