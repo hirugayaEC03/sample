@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import requests
 import os
 import concurrent.futures
@@ -40,12 +41,11 @@ def download_image(image_url, save_dir):
 
 # メインの画像ダウンロード処理
 def download_images_from_button_tags(url):
-    # ChromeDriverのパスを明示的に指定
-    service = Service("/usr/local/bin/chromedriver")
     chrome_options = set_chrome_options()
 
     try:
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        # webdriver_managerを使用してChromeDriverを自動的にインストール
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     except Exception as e:
         st.error(f"WebDriverの起動に失敗しました: {e}")
         return
@@ -89,7 +89,7 @@ def download_images_from_button_tags(url):
 
 # StreamlitアプリのUI
 def main():
-    st.title("商品画像ダウンロードアプリ")
+    st.title("商品画像ダウンロードアプリ (webdriver_manager使用)")
 
     # URLの入力
     url = st.text_input("画像を取得するURLを入力してください:")
