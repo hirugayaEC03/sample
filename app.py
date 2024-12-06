@@ -18,7 +18,7 @@ def download_images_from_button_tags(url):
     chrome_options = set_chrome_options()
 
     # ローカル環境に保存された `chromedriver` のパスを指定
-    chromedriver_path = r"C:\Users\hirug\.wdm\drivers\chromedriver\win64\131.0.6778.87\chromedriver-win32\chromedriver.exe"
+    chromedriver_path = r"C:\Users\hirug\.wdm\drivers\chromedriver\win64\131.0.6778.109\chromedriver-win32\chromedriver.exe"
 
     try:
         # 明示的にパスを指定して WebDriver を起動
