@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -7,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
-import os
 import concurrent.futures
 
 # Chromeのオプションを設定する関数
@@ -18,8 +18,11 @@ def set_chrome_options():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--disable-software-rasterizer")  # ソフトウェアラスタライズを無効化
+    chrome_options.add_argument("--disable-software-rasterizer")
     return chrome_options
+
+# 環境変数にchromedriverのパスを設定
+os.environ["PATH"] += os.pathsep + "/home/appuser/.wdm/drivers/chromedriver/linux64/114.0.5735.90/"
 
 # 複数の画像を並行してダウンロードする関数
 def download_images_concurrently(image_urls, save_dir):
@@ -44,7 +47,7 @@ def download_images_from_button_tags(url):
     chrome_options = set_chrome_options()
 
     try:
-        # webdriver_managerを使用してChromeDriverを自動的にインストール
+        # WebDriver Managerを使用してchromedriverを自動インストール
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     except Exception as e:
         st.error(f"WebDriverの起動に失敗しました: {e}")
@@ -89,7 +92,7 @@ def download_images_from_button_tags(url):
 
 # StreamlitアプリのUI
 def main():
-    st.title("商品画像ダウンロードアプリ (webdriver_manager使用)")
+    st.title("商品画像ダウンロードアプリ (環境変数設定)")
 
     # URLの入力
     url = st.text_input("画像を取得するURLを入力してください:")
